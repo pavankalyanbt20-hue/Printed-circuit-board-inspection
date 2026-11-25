@@ -1,2 +1,59 @@
 
-assets/models/llama/*.pte
+# Flutter and Dart
+.dart_tool/
+.packages
+.pub/
+.pub-cache/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Flutter generated files
+**/generated_plugin_registrant.dart
+
+# Android build files
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+android/captures/
+android/.cxx/
+android/.externalNativeBuild/
+
+# Android signing files - keep private
+android/key.properties
+*.jks
+*.keystore
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+
+# Operating system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+
+# Python cache (if used for preprocessing)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Dataset files - do not upload large datasets
+PCB Dataset/
+
+# APK and app bundles
+*.apk
+*.aab
+
+# Temporary model conversion files
+*.pth
+*.pt
+*.safetensors
