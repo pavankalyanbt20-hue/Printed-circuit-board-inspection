@@ -397,8 +397,10 @@ class MainActivity : FlutterActivity() {
                     throw RuntimeException(callbackError)
                 }
 
-                val response =
-                    generatedText.toString().trim()
+                val response = generatedText.toString()
+                    .replace("<|eot_id|>", "")
+                    .replace("<|end_of_text|>", "")
+                    .trim()
 
                 if (response.isEmpty()) {
                     throw RuntimeException(
