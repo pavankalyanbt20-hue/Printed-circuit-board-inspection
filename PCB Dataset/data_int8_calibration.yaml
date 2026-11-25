@@ -1,0 +1,12 @@
+path: 'C:/Industrial_Defect_Detection/standardized_dataset/deeppcb_yolo'
+train: images/train
+val: images/train
+test: images/test
+
+names:
+  0: Open
+  1: Short
+  2: Mousebite
+  3: Spur
+  4: Spurious_copper
+  5: Pin_hole
