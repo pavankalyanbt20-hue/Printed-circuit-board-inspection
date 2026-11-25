@@ -287,86 +287,67 @@ class _HomeScreenState extends State<HomeScreen> {
   List<DeepPcbDetection> found,
   List<SeverityResult> assessed,
 ) {
-  final systemMessage =
-      'You are an industrial PCB defect inspection assistant. '
-      'Analyze only the inspection information supplied by the user. '
-      'Explain detected PCB defects accurately. '
-      'Never invent defects, components, measurements, or causes. '
-      'If information is insufficient, clearly say so. '
-      'Give a concise report with defect, likely impact, '
-      'recommended corrective action, and priority.';
+  const classNames = <String, String>{
+    'open': 'Open Circuit',
+    'open_circuit': 'Open Circuit',
+    'short': 'Short Circuit',
+    'short_circuit': 'Short Circuit',
+    'mousebite': 'Mousebite',
+    'mouse_bite': 'Mousebite',
+    'spur': 'Spur',
+    'spurious_copper': 'Spurious Copper',
+    'missing_hole': 'Missing Hole',
+    'pin_hole': 'Missing Hole',
+  };
 
-  if (found.isEmpty) {
-    return '<|begin_of_text|>'
-        '<|start_header_id|>system<|end_header_id|>\n\n'
-        '$systemMessage'
-        '<|eot_id|>'
-        '<|start_header_id|>user<|end_header_id|>\n\n'
-        'No PCB defects were detected above the model confidence '
-        'threshold. Explain that this does not guarantee the PCB '
-        'is completely defect-free.'
-        '<|eot_id|>'
-        '<|start_header_id|>assistant<|end_header_id|>\n\n';
+  const descriptions = <String, String>{
+    'Open Circuit':
+        'Open Circuit is a break in a conductive path that stops current flow.',
+    'Short Circuit':
+        'Short Circuit to prevent overheating, component damage, or fire.',
+    'Mousebite':
+        'Mouse bites are tiny, closely spaced non-plated drill holes.',
+    'Spurious Copper':
+        'Spurious copper is unwanted copper left on a PCB due to incomplete etching.',
+    'Missing Hole':
+        'A tiny hole reaching down to the base copper.',
+    'Spur':
+        'Spur is a protrusion of copper sticking out from the edge of a track.',
+  };
+
+  final detectedDefects = <String>[];
+
+  for (final detection in found) {
+    final className = detection.className
+        .toLowerCase()
+        .trim()
+        .replaceAll('-', '_')
+        .replaceAll(' ', '_');
+
+    final defect = classNames[className];
+
+    if (defect != null && !detectedDefects.contains(defect)) {
+      detectedDefects.add(defect);
+    }
   }
 
-  final counts = <String, int>{};
-  final maxConfidence = <String, double>{};
-  final severityByClass = <String, String>{};
-
-  for (var i = 0; i < found.length; i++) {
-    final detection = found[i];
-    final name = detection.className;
-
-    counts[name] = (counts[name] ?? 0) + 1;
-
-    final previous = maxConfidence[name] ?? 0.0;
-
-    if (detection.confidence > previous) {
-      maxConfidence[name] = detection.confidence;
-    }
-
-    if (i < assessed.length) {
-      severityByClass[name] = assessed[i].severityLabel;
-    }
-  }
-
-  final classNames = counts.keys.toList()
-    ..sort((a, b) => counts[b]!.compareTo(counts[a]!));
-
-  final summary = classNames.map((name) {
-    final confidence =
-        ((maxConfidence[name] ?? 0) * 100).round();
-
-    return '$name: ${counts[name]} detected, '
-        'maximum confidence $confidence%, '
-        'severity ${severityByClass[name] ?? 'Unknown'}';
-  }).join('\n');
-
-  final overall = assessed.isEmpty
-      ? 'Unknown'
-      : severityLabel(
-          severityAssessmentService.overallSeverity(assessed),
-        );
-
-  final userMessage =
-      'PCB inspection results:\n'
-      '$summary\n'
-      'Overall severity: $overall\n\n'
-      'Explain these actual detections. '
-      'For each defect, describe its meaning, possible impact, '
-      'recommended corrective action, and priority. '
-      'Do not claim that an unlisted defect was detected.';
+  final responseText = detectedDefects
+      .map((defect) => descriptions[defect]!)
+      .join(' ');
 
   return '<|begin_of_text|>'
       '<|start_header_id|>system<|end_header_id|>\n\n'
-      '$systemMessage'
+      'Use only the following detected defect descriptions. '
+      'Return them exactly as provided, in one continuous paragraph. '
+      'Do not add, remove, or modify any words. '
+      'Do not include headings, numbering, or extra text.\n\n'
+      '$responseText'
       '<|eot_id|>'
       '<|start_header_id|>user<|end_header_id|>\n\n'
-      '$userMessage'
+      'Return the provided descriptions exactly as one paragraph.'
       '<|eot_id|>'
       '<|start_header_id|>assistant<|end_header_id|>\n\n';
 }
-
   // ------------------------------------------------------------
   // INSPECTION HISTORY
   // ------------------------------------------------------------
@@ -496,8 +477,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  // ------------------------------------------------------------
+    // ------------------------------------------------------------
   // AUTOMATIC LLAMA ASSET VERIFICATION
   // ------------------------------------------------------------
 
@@ -1004,8 +984,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
 
               const SizedBox(height: 10),
-
-              Container(
+                            Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -1066,7 +1045,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     if (llamaFilesVerified) ...[
                       const SizedBox(height: 8),
                       const Text(
-                        'Model: 802,050,432 bytes',
+                        'Model: 802,247,040 bytes',
                         style: TextStyle(fontSize: 12),
                       ),
                       const Text(
@@ -1160,9 +1139,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     const Text(
                       'After a successful DeepPCB inspection, Llama '
-                      'automatically analyzes the detected classes, '
-                      'confidence values, and severity assessment. '
-                      'No manual prompt is needed.',
+                      'automatically explains only the detected defect '
+                      'classes. No manual prompt is needed.',
                       style: TextStyle(color: Colors.blueGrey),
                     ),
 
@@ -1485,8 +1463,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  Widget reportLine(
+    Widget reportLine(
     String label,
     String value, {
     Color? valueColor,
@@ -1714,7 +1691,7 @@ Color defectColor(int classId) {
     Colors.pink,
   ];
 
-  return colors[classId.clamp(0, colors.length - 1)];
+  return colors[classId.clamp(0, colors.length - 1).toInt()];
 }
 
 // ------------------------------------------------------------
